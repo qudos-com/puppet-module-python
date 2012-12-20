@@ -28,7 +28,6 @@ define python::venv::isolate($ensure=present,
     exec { "python::venv $root":
       command => "virtualenv -p `which ${python}` ${root}",
       creates => $root,
-      notify => Exec["update distribute and pip in $root"],
       require => [File[$root_parent],
                   Package["python-virtualenv"]],
     }
@@ -37,6 +36,7 @@ define python::venv::isolate($ensure=present,
     # from the one that is in repos on most systems:
     exec { "update distribute and pip in $root":
       command => "$root/bin/pip install -U distribute pip",
+      subscribe => Exec["python::venv $root"],
       refreshonly => true,
     }
 
@@ -45,7 +45,8 @@ define python::venv::isolate($ensure=present,
         venv => $root,
         owner => $owner,
         group => $group,
-        require => Exec["python::venv $root"],
+        require => [Exec["python::venv $root"],
+                    Exec["update distribute and pip in $root"]],
       }
     }
 
