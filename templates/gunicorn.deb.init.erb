@@ -32,9 +32,14 @@ LOGFILE=<%= logfile %>
 WORKERS=<%= workers %>
 TIMEOUT=<%= timeout_seconds %>
 MODULE=<%= django ? django_settings : (paste ? paste_settings : wsgi_module) %>
+<% if django %>
+PYTHONPATH_PARAM="--pythonpath $SRC"
+<% else %>
+PYTHONPATH_PARAM=""
+<% end %>
 
 DAEMON_OPTS="-b $SOCKET -p $PIDFILE --log-file $LOGFILE \
---workers $WORKERS -t $TIMEOUT --daemon --name $NAME $MODULE"
+--workers $WORKERS -t $TIMEOUT --daemon --name $NAME $PYTHONPATH_PARAM $MODULE"
 
 test -x $DAEMON || exit 0
 
